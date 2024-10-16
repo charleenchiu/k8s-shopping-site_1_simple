@@ -36,8 +36,8 @@ pipeline {
                     sh '''
                         def currentDir = pwd()
                         echo "Current working directory: ${currentDir}"
-                        ls -al terraform/
-                        cd terraform
+                        ls -al ../terraform/
+                        cd ../terraform
                         terraform init
                         terraform apply -auto-approve
                     '''
