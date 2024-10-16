@@ -34,13 +34,7 @@ pipeline {
                         也不可有空行，
                         才不會發生找不到路徑的問題 */
                     sh '''
-                        echo "Checking current directory:"
                         pwd
-                        echo "Listing contents of workspace:"
-                        ls -al
-                        echo "Listing contents of terraform directory:"
-                        ls -al terraform
-                        echo "Changing to terraform directory and running init and apply:"
                         cd terraform
                         pwd
                         terraform init
@@ -70,36 +64,36 @@ pipeline {
         }
         */
 
-        stage('Build Docker Image') {
+        stage("Build Docker Image") {
             steps {
                 script {
                     // 使用 Dockerfile 建構 Image
-                    sh 'docker build -t $SITE_ECR_REPO:$IMAGE_TAG .'
-                    sh 'docker build -t $USER_SERVICE_ECR_REPO:$IMAGE_TAG .'
-                    sh 'docker build -t $PRODUCT_SERVICE_ECR_REPO:$IMAGE_TAG .'
-                    sh 'docker build -t $ORDER_SERVICE_ECR_REPO:$IMAGE_TAG .'
-                    sh 'docker build -t $PAYMENT_SERVICE_ECR_REPO:$IMAGE_TAG .'
+                    sh "docker build -t ${env.SITE_ECR_REPO}:${env.IMAGE_TAG} ."
+                    sh "docker build -t ${env.USER_SERVICE_ECR_REPO}:${env.IMAGE_TAG} ."
+                    sh "docker build -t ${env.PRODUCT_SERVICE_ECR_REPO}:${env.IMAGE_TAG} ."
+                    sh "docker build -t ${env.ORDER_SERVICE_ECR_REPO}:${env.IMAGE_TAG} ."
+                    sh "docker build -t ${env.PAYMENT_SERVICE_ECR_REPO}:${env.IMAGE_TAG} ."
                 }
             }
         }
 
-        stage('Login to ECR & Push Image') {
+        stage("Login to ECR & Push Image') {
             steps {
                 script {
                     // 透過 AWS CLI 登入 ECR
-                    sh 'aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com'
+                    sh "aws ecr get-login-password --region ${env.AWS_REGION} | docker login --username AWS --password-stdin ${env.AWS_ACCOUNT_ID}.dkr.ecr.${env.AWS_REGION}.amazonaws.com"
 
                     // Push Image 到 ECR
-                    sh 'docker tag $SITE_ECR_REPO:$IMAGE_TAG ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/$SITE_ECR_REPO:$IMAGE_TAG'
-                    sh 'docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/$SITE_ECR_REPO:$IMAGE_TAG'
-                    sh 'docker tag $USER_SERVICE_ECR_REPO:$IMAGE_TAG ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/$USER_SERVICE_ECR_REPO:$IMAGE_TAG'
-                    sh 'docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/$USER_SERVICE_ECR_REPO:$IMAGE_TAG'
-                    sh 'docker tag $PRODUCT_SERVICE_ECR_REPO:$IMAGE_TAG ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/$PRODUCT_SERVICE_ECR_REPO:$IMAGE_TAG'
-                    sh 'docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/$PRODUCT_SERVICE_ECR_REPO:$IMAGE_TAG'
-                    sh 'docker tag $ORDER_SERVICE_ECR_REPO:$IMAGE_TAG ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/$ORDER_SERVICE_ECR_REPO:$IMAGE_TAG'
-                    sh 'docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/$ORDER_SERVICE_ECR_REPO:$IMAGE_TAG'
-                    sh 'docker tag $PAYMENT_SERVICE_ECR_REPO:$IMAGE_TAG ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/$PAYMENT_SERVICE_ECR_REPO:$IMAGE_TAG'
-                    sh 'docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/$PAYMENT_SERVICE_ECR_REPO:$IMAGE_TAG'
+                    sh "docker tag ${env.SITE_ECR_REPO}:${env.IMAGE_TAG} ${env.AWS_ACCOUNT_ID}.dkr.ecr.${env.AWS_REGION}.amazonaws.com/${env.SITE_ECR_REPO}:${env.IMAGE_TAG}"
+                    sh "docker push ${env.AWS_ACCOUNT_ID}.dkr.ecr.${env.AWS_REGION}.amazonaws.com/${env.SITE_ECR_REPO}:${env.IMAGE_TAG}"
+                    sh "docker tag ${env.USER_SERVICE_ECR_REPO}:${env.IMAGE_TAG} ${env.AWS_ACCOUNT_ID}.dkr.ecr.${env.AWS_REGION}.amazonaws.com/${env.USER_SERVICE_ECR_REPO}:${env.IMAGE_TAG}"
+                    sh "docker push ${env.AWS_ACCOUNT_ID}.dkr.ecr.${env.AWS_REGION}.amazonaws.com/${env.USER_SERVICE_ECR_REPO}:${env.IMAGE_TAG}"
+                    sh "docker tag ${env.PRODUCT_SERVICE_ECR_REPO}:${env.IMAGE_TAG} ${env.AWS_ACCOUNT_ID}.dkr.ecr.${env.AWS_REGION}.amazonaws.com/${env.PRODUCT_SERVICE_ECR_REPO}:${env.IMAGE_TAG}"
+                    sh "docker push ${env.AWS_ACCOUNT_ID}.dkr.ecr.${env.AWS_REGION}.amazonaws.com/${env.PRODUCT_SERVICE_ECR_REPO}:${env.IMAGE_TAG}"
+                    sh "docker tag ${env.ORDER_SERVICE_ECR_REPO}:${env.IMAGE_TAG} ${env.AWS_ACCOUNT_ID}.dkr.ecr.${env.AWS_REGION}.amazonaws.com/${env.ORDER_SERVICE_ECR_REPO}:${env.IMAGE_TAG}"
+                    sh "docker push ${env.AWS_ACCOUNT_ID}.dkr.ecr.${env.AWS_REGION}.amazonaws.com/${env.ORDER_SERVICE_ECR_REPO}:${env.IMAGE_TAG}"
+                    sh "docker tag ${env.PAYMENT_SERVICE_ECR_REPO}:${env.IMAGE_TAG} ${env.AWS_ACCOUNT_ID}.dkr.ecr.${env.AWS_REGION}.amazonaws.com/${env.PAYMENT_SERVICE_ECR_REPO}:${env.IMAGE_TAG}"
+                    sh "docker push ${env.AWS_ACCOUNT_ID}.dkr.ecr.${env.AWS_REGION}.amazonaws.com/${env.PAYMENT_SERVICE_ECR_REPO}:${env.IMAGE_TAG}"
                 }
             }
         }
@@ -111,11 +105,11 @@ pipeline {
                     sh 'pwd'
 
                     // 使用 sed 替換 YAML 中的 Docker image 欄位
-                    sh "sed -i 's#your-dockerhub-username/k8s-shopping-site:latest#${env.SITE_ECR_REPO}:${env.IMAGE_TAG}#' ../k8s/site-service-deployment.yaml"
-                    sh "sed -i 's#your-dockerhub-username/k8s-shopping-site:latest#${env.USER_SERVICE_ECR_REPO}:${env.IMAGE_TAG}#' ../k8s/user-service-deployment.yaml"
-                    sh "sed -i 's#your-dockerhub-username/k8s-shopping-site:latest#${env.PRODUCT_SERVICE_ECR_REPO}:${env.IMAGE_TAG}#' ../k8s/product-service-deployment.yaml"
-                    sh "sed -i 's#your-dockerhub-username/k8s-shopping-site:latest#${env.ORDER_SERVICE_ECR_REPO}:${env.IMAGE_TAG}#' ../k8s/order-service-deployment.yaml"
-                    sh "sed -i 's#your-dockerhub-username/k8s-shopping-site:latest#${env.PAYMENT_SERVICE_ECR_REPO}:${env.IMAGE_TAG}#' ../k8s/payment-service-deployment.yaml"
+                    sh "sed -i \"s#your-dockerhub-username/k8s-shopping-site:latest#${env.SITE_ECR_REPO}:${env.IMAGE_TAG}#\" ../k8s/site-service-deployment.yaml"
+                    sh "sed -i \"s#your-dockerhub-username/k8s-shopping-site:latest#${env.USER_SERVICE_ECR_REPO}:${env.IMAGE_TAG}#\" ../k8s/user-service-deployment.yaml"
+                    sh "sed -i \"s#your-dockerhub-username/k8s-shopping-site:latest#${env.PRODUCT_SERVICE_ECR_REPO}:${env.IMAGE_TAG}#\" ../k8s/product-service-deployment.yaml"
+                    sh "sed -i \"s#your-dockerhub-username/k8s-shopping-site:latest#${env.ORDER_SERVICE_ECR_REPO}:${env.IMAGE_TAG}#\" ../k8s/order-service-deployment.yaml"
+                    sh "sed -i \"s#your-dockerhub-username/k8s-shopping-site:latest#${env.PAYMENT_SERVICE_ECR_REPO}:${env.IMAGE_TAG}#\" ../k8s/payment-service-deployment.yaml"
                 }
             }
         }
