@@ -30,7 +30,8 @@ pipeline {
                 script {
                     // 初始化 Terraform 並應用配置
                     /* Jenkins 的每一個 sh 步驟都在一個新的 shell 中執行，
-                        因此要在同一個 sh 步驟中執行所有相關的 Terraform 命令
+                        因此要在同一個 sh 步驟中執行所有相關的 Terraform 命令，
+                        也不可有空行，
                         才不會發生找不到路徑的問題 */
                     sh '''
                         def currentDir = pwd()
