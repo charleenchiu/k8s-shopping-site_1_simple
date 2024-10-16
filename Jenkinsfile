@@ -26,6 +26,12 @@ pipeline {
         stage('Terraform Init & Apply') {
             steps {
                 script {
+                    // 檢查當前工作目錄
+                    sh 'pwd'
+
+                    // 移到 Terraform 目錄
+                    sh 'cd ../terraform'
+
                     // 初始化 Terraform
                     sh 'terraform init'
 
@@ -127,12 +133,12 @@ pipeline {
                 }
             }
         }
+    }
 
-        post {
-            always {
-                // 無論成功與否，確保清理 Jenkins workspace
-                cleanWS()
-            }
+    post {
+        always {
+            // 無論成功與否，確保清理 Jenkins workspace
+            cleanWS()
         }
     }
 }
