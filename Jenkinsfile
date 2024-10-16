@@ -26,27 +26,25 @@ pipeline {
         stage('Terraform Init & Apply') {
             steps {
                 script {
-                    // 檢查當前工作目錄
-                    sh 'pwd'
-
-                    // 移到 Terraform 目錄
-                    sh 'cd ../terraform'
-
-                    // 初始化 Terraform
-                    sh 'terraform init'
-
-                    // 執行 Terraform Apply 建立資源
-                    sh 'terraform apply -auto-approve'
+                    // 初始化 Terraform 並應用配置
+                    /* Jenkins 的每一個 sh 步驟都在一個新的 shell 中執行，
+                        因此要在同一個 sh 步驟中執行所有相關的 Terraform 命令
+                        才不會發生找不到路徑的問題 */
+                    sh '''
+                        cd terraform
+                        terraform init
+                        terraform apply -auto-approve
+                    '''
 
                     // 取得 Terraform 的輸出，儲存輸出到 Jenkins 全域環境變數
-                    env.SITE_ECR_REPO = sh(script: 'terraform output -raw site_ecr_repo', returnStdout: true).trim()
-                    env.USER_SERVICE_ECR_REPO = sh(script: 'terraform output -raw user_service_ecr_repo', returnStdout: true).trim()
-                    env.PRODUCT_SERVICE_ECR_REPO = sh(script: 'terraform output -raw product_service_ecr_repo', returnStdout: true).trim()
-                    env.ORDER_SERVICE_ECR_REPO = sh(script: 'terraform output -raw order_service_ecr_repo', returnStdout: true).trim()
-                    env.PAYMENT_SERVICE_ECR_REPO = sh(script: 'terraform output -raw payment_service_ecr_repo', returnStdout: true).trim()
-                    env.EKS_CLUSTER_ARN = sh(script: 'terraform output -raw eks_cluster_arn', returnStdout: true).trim()
-                    env.EKS_CLUSTER_URL = sh(script: 'terraform output -raw eks_cluster_url', returnStdout: true).trim()
-                    env.KUBECONFIG_CERTIFICATE_AUTHORITY_DATA = sh(script: 'terraform output -raw kubeconfig_certificate_authority_data', returnStdout: true).trim()
+                    env.SITE_ECR_REPO = sh(script: 'cd terraform && terraform output -raw site_ecr_repo', returnStdout: true).trim()
+                    env.USER_SERVICE_ECR_REPO = sh(script: 'cd terraform && terraform output -raw user_service_ecr_repo', returnStdout: true).trim()
+                    env.PRODUCT_SERVICE_ECR_REPO = sh(script: 'cd terraform && terraform output -raw product_service_ecr_repo', returnStdout: true).trim()
+                    env.ORDER_SERVICE_ECR_REPO = sh(script: 'cd terraform && terraform output -raw order_service_ecr_repo', returnStdout: true).trim()
+                    env.PAYMENT_SERVICE_ECR_REPO = sh(script: 'cd terraform && terraform output -raw payment_service_ecr_repo', returnStdout: true).trim()
+                    env.EKS_CLUSTER_ARN = sh(script: 'cd terraform && terraform output -raw eks_cluster_arn', returnStdout: true).trim()
+                    env.EKS_CLUSTER_URL = sh(script: 'cd terraform && terraform output -raw eks_cluster_url', returnStdout: true).trim()
+                    env.KUBECONFIG_CERTIFICATE_AUTHORITY_DATA = sh(script: 'cd terraform && terraform output -raw kubeconfig_certificate_authority_data', returnStdout: true).trim()
                 }
             }
         }
