@@ -2,6 +2,8 @@ pipeline {
     agent any
 
     environment {
+        AWS_ACCESS_KEY_ID = credentials('AWS_ACCESS_KEY_ID')
+        AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
         AWS_REGION = 'us-east-1'    // AWS 區域
         AWS_ACCOUNT_ID = '167804136284' // AWS 帳戶 ID
         SITE_ECR_REPO = ''   // ECR Repository 名稱（將在 Terraform 階段後更新）
