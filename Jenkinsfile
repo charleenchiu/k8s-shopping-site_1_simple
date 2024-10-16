@@ -33,6 +33,8 @@ pipeline {
                         因此要在同一個 sh 步驟中執行所有相關的 Terraform 命令
                         才不會發生找不到路徑的問題 */
                     sh '''
+                        pwd
+                        ls -al terraform/
                         cd terraform
                         terraform init
                         terraform apply -auto-approve
