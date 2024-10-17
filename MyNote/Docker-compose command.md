@@ -67,3 +67,9 @@ docker builder prune -f
 -f：強制執行，不會提示確認。
 
 總結來說，docker system prune -f 是大掃除，清理範圍更廣；而 docker build prune -f 僅清理構建過程中的垃圾，範圍更小。
+
+清理不需要的 Docker 映像和容器：在磁碟空間不足的情況下，可以使用以下命令來清理不再使用的 Docker 資源：
+
+刪除未使用的容器：docker container prune
+刪除未使用的映像：docker image prune -a
+刪除未使用的卷：docker volume prune

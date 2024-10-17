@@ -19,4 +19,7 @@ terraform destroy -auto-approve
 # 在window power shell command：
 Remove-Item -Recurse -Force .terraform*
 Remove-Item -Recurse -Force terraform.tfstate*
+# 在Ubuntu：
+rm -rf .terraform*
+rm -rf terraform.tfstate*
 ```
