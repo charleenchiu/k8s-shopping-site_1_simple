@@ -64,7 +64,7 @@ pipeline {
         }
         */
 
-        stage("Build Docker Image") {
+        stage('Build Docker Image') {
             steps {
                 script {
                     // 使用 Dockerfile 建構 Image
@@ -77,7 +77,7 @@ pipeline {
             }
         }
 
-        stage("Login to ECR & Push Image') {
+        stage('Login to ECR & Push Image') {
             steps {
                 script {
                     // 透過 AWS CLI 登入 ECR
